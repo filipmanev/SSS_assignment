@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\College;
+
 use Illuminate\Http\Request;
 
 class CollegeController extends Controller
@@ -11,7 +13,8 @@ class CollegeController extends Controller
      */
     public function index()
     {
-        //
+        $colleges = College::orderBy('id', 'desc')->get();
+        return view('colleges.index', compact('colleges'));
     }
 
     /**
@@ -19,7 +22,7 @@ class CollegeController extends Controller
      */
     public function create()
     {
-        //
+        return view('colleges.create');
     }
 
     /**
@@ -27,7 +30,14 @@ class CollegeController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|unique:college,name',
+            'address' => 'required',
+        ]);
+
+        College::create($request->all());
+
+        return redirect()->route('colleges.index')->with('success', 'College created sucesssfully!');
     }
 
     /**
@@ -35,7 +45,8 @@ class CollegeController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $college = College::findOrFail($id);
+        return view('colleges.show', compact('college'));
     }
 
     /**
@@ -43,7 +54,8 @@ class CollegeController extends Controller
      */
     public function edit(string $id)
     {
-       //
+        $college = College::findOrFail($id);
+        return view('colleges.edit', compact('college'));
     }
 
     /**
@@ -51,7 +63,15 @@ class CollegeController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'name' => 'required|unique:college,name,'.$id,
+            'address' => 'required',
+        ]);
+
+        $college = College::findOrFail($id);
+        $college->update($request->only(['name', 'address']));
+        
+        return redirect()->route('colleges.index')->with('success', 'college updated successfully!');
     }
 
     /**
@@ -59,6 +79,9 @@ class CollegeController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $college = College::findOrFail($id);
+        $college->delete();
+
+        return redirect()->route('colleges.index')->with('success', 'college deleted successfully!');
     }
 }
